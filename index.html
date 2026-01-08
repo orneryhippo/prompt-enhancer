@@ -220,6 +220,7 @@
         <div class="mode-selector">
             <button class="mode-btn active" data-mode="text">Text Generation</button>
             <button class="mode-btn" data-mode="image">Image Generation</button>
+            <button class="mode-btn" data-mode="character">Character</button>
         </div>
 
         <div class="input-section">
@@ -272,8 +273,10 @@
                 const textarea = document.getElementById('original-prompt');
                 if (currentMode === 'text') {
                     textarea.placeholder = "Enter your prompt here... (e.g., 'write about productivity tips')";
+                } else if (currentMode === 'image') {
+                    textarea.placeholder = "Enter your prompt here... (e.g., 'sunset beach')";
                 } else {
-                    textarea.placeholder = "Enter your prompt here... (e.g., 'a cat in space')";
+                    textarea.placeholder = "Enter your prompt here... (e.g., 'a female warrior' or 'cyberpunk hacker')";
                 }
             });
         });
@@ -316,9 +319,14 @@
         });
 
         async function enhancePrompt(prompt, mode) {
-            const systemPrompt = mode === 'text' 
-                ? getTextEnhancementPrompt() 
-                : getImageEnhancementPrompt();
+            let systemPrompt;
+            if (mode === 'text') {
+                systemPrompt = getTextEnhancementPrompt();
+            } else if (mode === 'image') {
+                systemPrompt = getImageEnhancementPrompt();
+            } else {
+                systemPrompt = getCharacterEnhancementPrompt();
+            }
 
             const response = await fetch('https://api.anthropic.com/v1/messages', {
                 method: 'POST',
@@ -394,6 +402,39 @@ lighting: dramatic rim lighting from distant sun, stars twinkling, soft glow fro
 composition: medium close-up portrait, slightly low angle, shallow depth of field, rule of thirds, centered subject with space backdrop
 quality: 8k resolution, ultra sharp focus, intricate detail, professional grade, crisp edges, ray-traced reflections
 mood: sense of wonder and adventure, peaceful isolation, majestic exploration, curious and brave, inspirational`;
+        }
+
+        function getCharacterEnhancementPrompt() {
+            return `You are a character prompt enhancement expert. Transform the user's basic character description into a detailed, organized format optimized for character image generation.
+
+Format each section on its own line with detailed descriptions:
+
+physical_appearance: [face shape, eyes, hair, skin tone, body type, height, distinctive features, age appearance]
+attire: [clothing style, outfit details, accessories, footwear, colors, materials, condition]
+pose_action: [body position, gesture, expression, action, dynamic movement, hand placement]
+setting: [environment, background, location details, atmosphere, time period, props]
+composition: [shot type (close-up/medium/cowboy shot/full body), angle, framing, focus, depth of field]
+style: [art style, rendering technique, artistic influences, medium]
+lighting: [light source, shadows, highlights, mood lighting, color temperature]
+mood: [emotion, personality, character energy, overall feeling]
+
+Rules:
+- Be highly specific with physical details
+- Include cultural/style influences where relevant
+- Shot types: close-up (head/shoulders), medium shot (waist up), cowboy shot (mid-thigh up), full body
+- Add camera angles: eye level, low angle, high angle, dutch angle
+- Output ONLY the formatted prompt, nothing else
+
+Example input: "a female warrior"
+Example output:
+physical_appearance: strong jawline with high cheekbones, piercing green eyes with determined gaze, long braided auburn hair with silver threads, tanned weathered skin, athletic muscular build, tall stature around 6 feet, battle scar across left eyebrow, appears mid-30s
+attire: worn leather armor with metal pauldrons, dark burgundy cape with Celtic knots, reinforced leather gauntlets, sturdy combat boots, weathered belt with pouches, silver sword at hip, tribal arm bands
+pose_action: standing in confident warrior stance, hand resting on sword hilt, slight forward lean suggesting readiness, fierce determined expression, wind-blown hair, battle-ready posture
+setting: ancient stone ruins at dusk, misty mountains in background, scattered weapons on ground, dramatic sky with storm clouds, torch flames nearby, medieval battlefield aftermath
+composition: cowboy shot (mid-thigh up), slight low angle to emphasize power, rule of thirds placement, shallow depth of field with sharp focus on face and upper body, background slightly blurred
+style: digital painting, fantasy art, concept art style, painterly brushwork, inspired by Frazetta and Vallejo, cinematic illustration, high detail rendering
+lighting: dramatic side lighting from setting sun, rim light creating silhouette effect, warm orange glow contrasting cool shadows, volumetric light rays through mist, high contrast
+mood: fierce and determined, battle-hardened strength, noble warrior spirit, heroic presence, commanding and powerful, legendary hero energy`;
         }
 
         function displayResults(original, enhanced) {
